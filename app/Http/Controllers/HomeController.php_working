@@ -1,0 +1,248 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use Setting;
+use DB;
+use Auth;
+
+class HomeController extends Controller
+{
+    protected $UserAPI;
+
+    /**
+     * Create a new controller instance.
+     *
+     * @return void
+     */
+    public function __construct(UserApiController $UserAPI)
+    {
+        $this->middleware('auth');
+        $this->UserAPI = $UserAPI;
+    }
+
+    /**
+     * Show the application dashboard.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index(Request $request)
+    {
+
+       if(Auth::user()->mobile==null || Auth::user()->mobile==''|| is_numeric(Auth::user()->mobile)=='' ){
+           return redirect()->to('/profile'); 
+       }
+        $Response = $this->UserAPI->request_status_check()->getData();
+//dd($Response);
+        if(empty($Response->data))
+        {
+            if($request->has('service')){
+                $cards = (new Resource\CardResource)->index();
+				
+                $service = (new Resource\ServiceResource)->show($request->service);
+				//echo "<pre>";print_r($service);die;
+                return view('user.request',compact('cards','service'));
+            }else{
+                $services = $this->UserAPI->services();
+                return view('user.dashboard',compact('services'));
+            }
+        }else{
+            return view('user.ride.waiting')->with('request',$Response->data[0]);
+        }
+    }
+	
+    public function index2(Request $request)
+    { 
+	   //echo "<pre>";print_r($request->all());die;
+	   $s_address  = $request['s_address']; 
+	   $latitude   = $request['s_latitude'];
+ 	   $longitude  = $request['s_longitude'];
+ 	   $service_id = $request['service_type'];
+	   $schedule_time = $request['schedule_time'];
+	   $schedule_date = $request['schedule_date'];
+	   
+	   $url = 'http://www.bestservicepoint.com/storage/app/public/';
+             $sql  ="select
+             (((acos(sin(('$latitude'*pi()/180)) * sin((`latitude`*pi()/180))+cos(('$latitude'*pi()/180)) 
+             * cos((`latitude`*pi()/180)) * cos((('$longitude'- `longitude`)*pi()/180))))*180/pi())*60*1.1515) 
+             AS  distance
+              ,providers.id,providers.first_name,providers.last_name,providers.email,providers.rating,
+			  providers.mobile,providers.avatar,
+			  provider_services.service_type_id,provider_services.service_ki_price
+			 ,concat('$url',providers.avatar) as image_of,exp,status_date,description
+			  from providers 
+              join  provider_services on providers.id = provider_services.provider_id	
+              where provider_services.service_type_id = '$service_id' AND providers.status = 'approved'			  
+              having distance < 15 ";
+			  
+              $query = DB::select($sql);
+           
+			 // echo "<pre>";print_r($query);die;
+		      return view('user/request2',['service_id'=> $service_id,'data'=>$query,
+			                              'latitude'=>$latitude,'longitude'=>$longitude,
+										  's_address' => $s_address,'schedule_time'=>$schedule_time,'schedule_date'=>$schedule_date]);
+    }	
+	
+	
+public function sig()
+{
+	echo "ok";die;
+}
+    /**
+     * Show the application profile.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function profile()
+    {
+        return view('user.account.profile');
+    }
+
+    /**
+     * Show the application profile.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function edit_profile()
+    {
+        return view('user.account.edit_profile');
+    }
+
+    /**
+     * Update profile.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function update_profile(Request $request)
+    {
+
+        if(Setting::get('demo_mode', 0) == 1) {
+            return back()->with('flash_error', 'Disabled for demo purposes! Please contact us at info@dragon.com');
+        }
+
+        return $this->UserAPI->update_profile($request);
+    }
+
+    /**
+     * Show the application change password.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function change_password()
+    {
+        return view('user.account.change_password');
+    }
+
+    /**
+     * Change Password.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function update_password(Request $request)
+    {
+        if(Setting::get('demo_mode', 0) == 1) {
+            return back()->with('flash_error', 'Disabled for demo purposes! Please contact us at info@dragon.com');
+        }
+        
+        return $this->UserAPI->change_password($request);
+    }
+
+    /**
+     * Trips.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function trips()
+    {
+        $provider_id = Auth::user()->id;
+        $sql = "SELECT ur.*,u.first_name,u.last_name,u.email ,st.name as service_name  FROM user_requests ur 
+		         JOIN providers u ON ur.user_id = u.id JOIN service_types st on ur.service_type_id= st.id
+	             where ur.user_id = '$provider_id' AND ur.status != 'SCHEDULED'";
+	
+	    $query = DB::select($sql);
+
+		//$trips = $this->UserAPI->trips();   # THIS IS OLD CODE TO DISPLAY MY TRIP AS USER
+		 //return view('user.ride.trips',compact('trips'));
+		//echo "<pre>";print_r($query);die;
+		return view('user.ride.trips222',['fully' => $query]);
+       
+    }
+    
+        public function my_request()
+    {
+        $provider_id = Auth::user()->id;
+        $sql = "SELECT ur.*,u.first_name,u.last_name,u.email ,st.name as service_name  FROM user_requests ur 
+		         JOIN users u ON ur.user_id = u.id JOIN service_types st on ur.service_type_id= st.id
+	             where ur.user_id = '$provider_id' AND ur.status != 'SCHEDULED'";
+	 
+	    $query = DB::select($sql);
+
+		//$trips = $this->UserAPI->trips();   # THIS IS OLD CODE TO DISPLAY MY TRIP AS USER
+		 //return view('user.ride.trips',compact('trips'));
+		//echo "<pre>";print_r($query);die;
+		return view('user.ride.trips222',['fully' => $query]);
+       
+    }
+
+     /**
+     * Payment.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function payment()
+    {
+        $cards = (new Resource\CardResource)->index();
+        return view('user.account.payment',compact('cards'));
+    }
+
+        public function help()
+    {
+       
+        return view('user.help');
+    }
+
+    /**
+     * Wallet.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function wallet(Request $request)
+    {
+        $cards = (new Resource\CardResource)->index();
+        return view('user.account.wallet',compact('cards'));
+    }
+
+    /**
+     * Promotion.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function promotion(Request $request)
+    {
+        $promocodes = $this->UserAPI->promocodes()->getData();
+        return view('user.account.promotion',compact('promocodes'));
+    }
+
+    /**
+     * Add promocode.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function add_promocode(Request $request)
+    {
+        return $this->UserAPI->add_promocode($request);
+    }
+
+    /**
+     * Upcoming Trips.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function upcoming_trips()
+    {
+        $trips = $this->UserAPI->upcoming_trips();
+        return view('user.ride.upcoming',compact('trips'));
+    }
+
+}
