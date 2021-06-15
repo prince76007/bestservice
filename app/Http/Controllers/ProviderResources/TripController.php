@@ -461,8 +461,9 @@ $msg = array
         try{
 			
 $req_id = $id;
-$sql="select u.mobile,u.device_token from user_requests ru join users u on ru.user_id = u.id where ru.id ='$req_id'";
+$sql="select u.mobile,u.device_token,u.id as 'user_id' from user_requests ru join users u on ru.user_id = u.id where ru.id ='$req_id'";
 $query = DB::select($sql);
+$user_id=$query[0]->user_id;
 $mobile = $query[0]->mobile;
 $message= urlencode('BEST SERVICE: Dear user your request has been accepted by service provider');
 # CODE TO SEND NOTIFICATION TO User
@@ -582,6 +583,21 @@ else
 
             // Send Push Notification to User
        //dd($UserRequest); 
+
+       if($request->status=='COMPLETED'){
+           UserRequests::
+           if()
+            $data=DB::table('referral_data')->where('user_id',$user_id)->first();
+           // $refdata=array("user_id"=>$User['id']);
+          //  $refdata=array("status"=>"deactive");
+              //    DB::table('referral_data')->where('user_id',$user_id)->update($refdata);
+            if($data!=null && $data!=''){
+                if($data['referral_by']!=null && $data['referral_by']!=''){
+                    $ref_by=DB::table('users')->where('referral_id',$data['referral_by'])->first();
+
+                }
+            }
+       }
             return $UserRequest;
 
         } catch (ModelNotFoundException $e) {

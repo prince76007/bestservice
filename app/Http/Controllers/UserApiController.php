@@ -156,21 +156,27 @@ class UserApiController extends Controller
             if($User==null || $User==''){
                     $User=User::findOrFail($request->id);
                 }
-                if(DB::table('referral_data')->where('referral_to',$User['referral_id'])->exists()){
-                    $data=DB::table('referral_data')->where('referral_to',$User['referral_id'])->first();
+                    $data=DB::table('referral_data')->where('user_id',$User['id'])->first();
+                    if($data!=null &&$data!=''){
                     if($data->referral_by==null || $data->referral_by==''){
                         if($request->referral_code!=null && $request->referral_code!=''){
                            // DB::table('referral_data')->insert($refcodeData);
-                           DB::table('referral_data')->where('referral_to',$User['referral_id'])
+                           DB::table('referral_data')->where('user_id',$User['id'])
                             ->update(['referral_by' => $request->referral_code]);
                             return response()->json(['status' =>trans("Referral Code added Succesfully")], 200);
                         }
-                        return response()->json(['status' =>trans("1")], 200);
+                        return response()->json(['status' =>trans("0")], 200);
                     }else{
-                        return response()->json(['status' =>trans("2")], 200);
+                        return response()->json(['status' =>trans("1")], 200);
                     }
                 }else{
-                    return response()->json(['status' =>trans("0")], 500);
+                    //$newstring = substr($User['mobile'], -4);
+
+                   // $User['referral_id']=$User['first_name'].'_'.$newstring;
+                    
+                    $data=array("user_id"=>$User['id']);
+                  DB::table('referral_data')->insert($data);
+                    return response()->json(['status' =>trans("0")], 200);
                 }
         }catch(Exception $e){
             return response()->json(['error' => trans($e->getMessage())], 500);
@@ -188,7 +194,7 @@ class UserApiController extends Controller
                $users=array();
                foreach($data as $subData){
                    $subData=(array)$subData;
-                $usedBy=User::where('referral_id' ,$subData['referral_to'])->first();//all data from table
+                $usedBy=User::where('id' ,$subData['user_id'])->first();//all data from table
                     if($usedBy!=null && $usedBy!=''){
                         $usedByRefined['id']=$usedBy['id'];
                         $usedByRefined['picture']=$usedBy['picture'];
@@ -257,10 +263,11 @@ class UserApiController extends Controller
 
             $User['referral_id']=$request->first_name.'_'.$newstring;
 
-            $data=array("referral_to"=>$request->first_name.'_'.$newstring);
-          DB::table('referral_data')->insert($data);
+          
             
             $User = User::create($User);
+            $data=array("user_id"=>$User->id);
+            DB::table('referral_data')->insert($data);
             }
 
               if(isset($User->id)){
@@ -533,6 +540,11 @@ class UserApiController extends Controller
         }
 
     }
+
+    public function sub_services(Request $request){
+            
+    }
+    
 
 
     /**
