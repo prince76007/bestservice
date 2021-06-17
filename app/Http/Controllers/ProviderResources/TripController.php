@@ -585,18 +585,31 @@ else
        //dd($UserRequest); 
 
        if($request->status=='COMPLETED'){
-           UserRequests::
-           if()
-            $data=DB::table('referral_data')->where('user_id',$user_id)->first();
-           // $refdata=array("user_id"=>$User['id']);
-          //  $refdata=array("status"=>"deactive");
-              //    DB::table('referral_data')->where('user_id',$user_id)->update($refdata);
-            if($data!=null && $data!=''){
-                if($data['referral_by']!=null && $data['referral_by']!=''){
-                    $ref_by=DB::table('users')->where('referral_id',$data['referral_by'])->first();
-
+        $data=DB::table('referral_data')->where('user_id',$user_id)->first();
+        if($data!=null && $data!=''){
+            if(($data['referral_by']!=null && $data['referral_by']!='') && $data['status']=='active'){
+               // $ref_by=DB::table('users')->where('referral_id',$data['referral_by'])->first();
+                //   $getUserRequest=UserRequest::where('user_id',$user_id);
+                $getUserRequest=DB::table('user_requests')->where('user_id',$user_id)->get();
+                if($getUserRequest->count()==1){
+                    $userReqId=$getUserRequest['id'];
+                    $userReqPayment=DB::table('user_request_payments')->where('request_id',$userReqId)->first();
+                    $amount=(int)$userReqPayment['total'];
+                     $ref_by=User::findOrFail($data['referral_by']);
+                     $ref_by->wallet_balance=($amount/100) * 5;
+                     $ref_by->save();
                 }
+                
+                $refdata=array("status"=>"deactive");
+                DB::table('referral_data')->where('user_id',$user_id)->update($refdata);
+            }elseif(($data['referral_by']==null || $data['referral_by']=='')&& $data['status']=='active'){
+                $refdata=array("status"=>"deactive");
+                DB::table('referral_data')->where('user_id',$user_id)->update($refdata);
             }
+        }
+    
+           
+           
        }
             return $UserRequest;
 

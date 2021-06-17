@@ -158,7 +158,7 @@ class UserApiController extends Controller
                 }
                     $data=DB::table('referral_data')->where('user_id',$User['id'])->first();
                     if($data!=null &&$data!=''){
-                    if($data->referral_by==null || $data->referral_by==''){
+                    if(($data->referral_by==null || $data->referral_by=='') && $data->status=="active"){
                         if($request->referral_code!=null && $request->referral_code!=''){
                            // DB::table('referral_data')->insert($refcodeData);
                            DB::table('referral_data')->where('user_id',$User['id'])
