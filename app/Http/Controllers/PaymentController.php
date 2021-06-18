@@ -64,6 +64,31 @@ class PaymentController extends Controller
       	    		$UserRequest->save();
 
                     if($request->ajax()){
+                        $data=DB::table('referral_data')->where('user_id',Auth::user()->id)->first();
+        if($data!=null && $data!=''){
+            if(($data['referral_by']!=null && $data['referral_by']!='') && $data['status']=='active'){
+               // $ref_by=DB::table('users')->where('referral_id',$data['referral_by'])->first();
+                //   $getUserRequest=UserRequest::where('user_id',$user_id);
+                $getUserRequest =UserRequests::where('status','COMPLETED')
+                            ->where('user_id', Auth::user()->id)->get();
+             
+                if($getUserRequest->count()==1){
+                    $userReqId=$getUserRequest->id;
+                    $userReqPayment=UserRequestPayment::where('request_id',$request->request_id)->first();
+                    $amount=(int)$userReqPayment->total;
+                     $ref_by=User::findOrFail($data['referral_by']);
+                     $ref_by->wallet_balance=($amount/100) * 5;
+                     $ref_by->save();
+                }
+                
+                $refdata=array("status"=>"deactive");
+                DB::table('referral_data')->where('user_id',$user_id)->update($refdata);
+            }elseif(($data['referral_by']==null || $data['referral_by']=='')&& $data['status']=='active'){
+                $refdata=array("status"=>"deactive");
+                DB::table('referral_data')->where('user_id',$user_id)->update($refdata);
+            }
+        }
+
                   	   return response()->json(['message' => trans('api.paid')]); 
                     }else{
                         return redirect('dashboard')->with('flash_success','Paid');

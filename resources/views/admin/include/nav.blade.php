@@ -48,9 +48,9 @@
 		<span class="s-text">Slider </span>
 	</a>
 	<ul>
-		<li><a href="{{ URL::to("add_slider")}}">Add Slider</a></li>
-		<li><a href="{{ URL::to("all_slider")}}">All User Slider </a></li>
-		<li><a href="{{ URL::to("all_slider_as_provider")}}">All Provider Slider </a></li>
+		<li><a href="{{ URL::to('add_slider')}}">Add Slider</a></li>
+		<li><a href="{{ URL::to('all_slider')}}">All User Slider </a></li>
+		<li><a href="{{ URL::to('all_slider_as_provider')}}">All Provider Slider </a></li>
 	</ul>
 </li>				
 			
@@ -102,6 +102,17 @@
 				<ul>
 					<li><a href="{{route('admin.service.index')}}">List Service Types</a></li>
 					<li><a href="{{route('admin.service.create')}}">Add New Service Type</a></li>
+				</ul>
+			</li>
+			<li class="with-sub">
+				<a href="#" class="waves-effect  waves-light">
+					<span class="s-caret"><i class="fa fa-angle-down"></i></span>
+					<span class="s-icon"><i class="ti-view-grid"></i></span>
+					<span class="s-text">Service Sub Types</span>
+				</a>
+				<ul>
+					<li><a href="{{route('admin.servicesub.index')}}">List Service Sub Types</a></li>
+					<li><a href="{{route('admin.servicesub.create')}}">Add New Service Sub Type</a></li>
 				</ul>
 			</li>
 			<li class="with-sub">

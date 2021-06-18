@@ -20,6 +20,7 @@ Route::resource('user', 	'Resource\UserResource');
 Route::resource('provider', 'Resource\ProviderResource');
 Route::resource('document', 'Resource\DocumentResource');
 Route::resource('service', 	'Resource\ServiceResource');
+Route::resource('servicesub', 	'Resource\ServiceSubResource');
 Route::resource('promocode','Resource\PromocodeResource');
 
 Route::group(['as' => 'provider.'], function () {
