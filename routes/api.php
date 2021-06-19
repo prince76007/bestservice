@@ -24,6 +24,7 @@ Route::post('/reset/password',      'UserApiController@reset_password');
 Route::post('/getrefcode','UserApiController@get_user_referralcode');
 Route::post('/getrefdata','UserApiController@get_referral_data');
 Route::post('/isrefcodesubmited','UserApiController@isrefcodesubmited');
+Route::get('/services' , 'UserApiController@services');
 Route::group(['middleware' => ['auth:api']], function () {
 
 	// user profile
@@ -36,7 +37,7 @@ Route::group(['middleware' => ['auth:api']], function () {
 
 	// services
 
-	Route::get('/services' , 'UserApiController@services');
+	// Route::get('/services' , 'UserApiController@services');
 
 	// provider
 

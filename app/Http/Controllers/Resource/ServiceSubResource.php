@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Resource;
 
 use App\ServiceSubType;
+use App\ServiceType;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\Http\Controllers\Controller;
@@ -21,6 +22,10 @@ class ServiceSubResource extends Controller
     public function index(Request $request)
     {
         $servicesub = ServiceSubType::all();
+        foreach($servicesub as $key=>$sub){
+        $parentservice=ServiceType::where('id',$sub->service_type_id)->first();
+        $servicesub[$key]['service_type_name']=$parentservice['name'];
+        }
         if($request->ajax()) {
             return $servicesub;
         } else {
@@ -35,7 +40,8 @@ class ServiceSubResource extends Controller
      */
     public function create()
     {
-        return view('admin.servicesub.create');
+        $parentservices=ServiceType::all();
+        return view('admin.servicesub.create',compact('parentservices'));
     }
 
     /**
@@ -103,8 +109,10 @@ class ServiceSubResource extends Controller
     public function edit($id)
     {
         try {
+            //$masterArray=array();
+            $parentservices=ServiceType::all();
             $services_sub = ServiceSubType::findOrFail($id);
-            return view('admin.servicesub.edit',compact('services_sub'));
+            return view('admin.servicesub.edit',compact('services_sub'),compact('parentservices'));
         } catch (ModelNotFoundException $e) {
             return $e;
         }

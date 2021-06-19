@@ -27,7 +27,7 @@
                     @foreach($servicesub as $index => $sub_service)
                         <tr>
                             <td>{{$index + 1}}</td>
-                            <td>{{$sub_service->service_type_id}}</td>
+                            <td>{{$sub_service->service_type_name}}</td>
                             <td>{{$sub_service->name}}</td>
                             <td>{{$sub_service->provider_name}}</td>
                             <td>{{currency($sub_service->fixed)}}</td>

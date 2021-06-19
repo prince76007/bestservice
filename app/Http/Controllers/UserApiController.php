@@ -19,6 +19,7 @@ use App\UserRequests;
 use App\Promocode;
 use App\RequestFilter;
 use App\ServiceType;
+use App\ServiceSubType;
 use App\Provider;
 use App\Settings;
 use App\UserRequestRating;
@@ -555,13 +556,27 @@ class UserApiController extends Controller
 
     public function services() {
 
+        try{
         if($serviceList = ServiceType::all()) {
+            foreach($serviceList as $key=>$service){
+               $subservices= DB::table('service_sub_types')->where('service_type_id',$service['id'])->get();
+
+                if($subservices->count()>0){
+                    foreach($subservices as $skey=>$subService){
+                        $serviceList[$key]['sub_services']=$subService;
+                    }
+                   
+                }
+            }
             return $serviceList;
         } else {
             return response()->json(['error' => trans('api.services_not_found')], 500);
         }
 
+    }catch(Exception $e){
+        return response()->json(['error' => trans($e->getMessage())], 500);
     }
+}
 
 
     /**

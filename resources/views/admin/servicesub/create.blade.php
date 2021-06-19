@@ -7,11 +7,11 @@
 <div class="content-area py-1">
     <div class="container-fluid">
     	<div class="box box-block bg-white">
-            <a href="{{ route('admin.service.index') }}" class="btn btn-default pull-right"><i class="fa fa-angle-left"></i> Back</a>
+            <a href="{{ route('admin.servicesub.index') }}" class="btn btn-default pull-right"><i class="fa fa-angle-left"></i> Back</a>
 
-			<h5 style="margin-bottom: 2em;">Add Service Type</h5>
+			<h5 style="margin-bottom: 2em;">Add Service Sub Type</h5>
 
-            <form class="form-horizontal" action="{{route('admin.service.store')}}" method="POST" enctype="multipart/form-data" role="form">
+            <form class="form-horizontal" action="{{route('admin.servicesub.store')}}" method="POST" enctype="multipart/form-data" role="form">
             	{{csrf_field()}}
 				<div class="form-group row">
 					<label for="name" class="col-xs-12 col-form-label">Service Name</label>
@@ -19,7 +19,23 @@
 						<input class="form-control" type="text" value="{{ old('name') }}" name="name" required id="name" placeholder="Service Name">
 					</div>
 				</div>
-
+				<div class="form-group row">
+				<label for="service_type_id" class="col-xs-12 col-form-label">Parent Service</label>
+				<div class="col-xs-10">
+				<select class="form-control input" name="service_type_id" required id="service_type_id">
+							    <option ="">Select Parent Type</option>
+                                @forelse($parentservices as $parentType)
+                                <option value="{{ $parentType->id }}">{{ $parentType->name }}</option>
+                                @empty
+                                <option>- Please Create a Service Type -</option>
+                                @endforelse
+                            </select>
+							</div>
+					<!-- <label for="service_type_id" class="col-xs-12 col-form-label">Parent Service</label>
+					<div class="col-xs-10">
+						<input class="form-control" type="text" value="{{ old('service_type_id') }}" name="name" required id="service_type_id" placeholder="Service Name">
+					</div> -->
+				</div>
 				<div class="form-group row">
 					<label for="provider_name" class="col-xs-12 col-form-label">Service Description </label>
 					<div class="col-xs-10">
@@ -51,8 +67,8 @@
 				<div class="form-group row">
 					<label for="zipcode" class="col-xs-2 col-form-label"></label>
 					<div class="col-xs-10">
-						<button type="submit" class="btn btn-primary">Add Service Type</button>
-						<a href="{{route('admin.service.index')}}" class="btn btn-default">Cancel</a>
+						<button type="submit" class="btn btn-primary">Add Service Sub Type</button>
+						<a href="{{route('admin.servicesub.index')}}" class="btn btn-default">Cancel</a>
 					</div>
 				</div>
 			</form>
